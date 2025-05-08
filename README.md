@@ -1,6 +1,10 @@
 # @plust/search-sdk
 
-A TypeScript SDK for web search providers, offering a unified interface to interact with various search APIs.
+A unified TypeScript SDK for integrating with multiple web search providers through a single, consistent interface.
+
+## Overview
+
+The Search SDK provides a standardized way to interact with various search APIs, allowing developers to easily switch between providers or use multiple providers simultaneously without changing application code.
 
 ## Installation
 
@@ -8,26 +12,7 @@ A TypeScript SDK for web search providers, offering a unified interface to inter
 npm install @plust/search-sdk
 ```
 
-## Features
-
-- 🔄 Unified API across multiple search providers
-- 🔍 Support for 6 popular search APIs
-- 🔒 Type-safe interfaces with full TypeScript support
-- 📊 Standardized result format with provider-specific raw data access
-- 🛠️ Configurable request parameters (safe search, pagination, language, etc.)
-
-## Supported Providers
-
-- Google Custom Search JSON API
-- SerpAPI
-- Brave Search API
-- Exa API
-- Tavily API
-- SearXNG (self-hosted search)
-
-## Usage
-
-### Basic Example
+## Quick Start
 
 ```typescript
 import { google, webSearch } from '@plust/search-sdk';
@@ -52,9 +37,31 @@ async function search() {
 search();
 ```
 
-### Using Different Providers
+## Key Features
 
-#### Google Custom Search
+- Unified API for working with multiple search providers
+- Standardized result format across all providers
+- Comprehensive type safety with TypeScript
+- Configurable search parameters (pagination, safe search, language, etc.)
+- Detailed error handling with provider-specific troubleshooting
+- Built-in debugging capabilities
+
+## Supported Search Providers
+
+The SDK currently supports the following search APIs:
+
+- [Google Custom Search](https://developers.google.com/custom-search/v1/overview)
+- [SerpAPI](https://serpapi.com/)
+- [Brave Search](https://brave.com/search/api/)
+- [Exa](https://exa.ai/)
+- [Tavily](https://tavily.com/)
+- [Custom SearXNG](https://docs.searxng.org/)
+
+## Provider Configuration
+
+Each search provider needs to be configured before use:
+
+### Google Custom Search
 
 ```typescript
 import { google, webSearch } from '@plust/search-sdk';
@@ -71,7 +78,7 @@ const results = await webSearch({
 });
 ```
 
-#### SerpAPI
+### SerpAPI
 
 ```typescript
 import { serpapi, webSearch } from '@plust/search-sdk';
@@ -88,7 +95,7 @@ const results = await webSearch({
 });
 ```
 
-#### Brave Search
+### Brave Search
 
 ```typescript
 import { brave, webSearch } from '@plust/search-sdk';
@@ -105,7 +112,7 @@ const results = await webSearch({
 });
 ```
 
-#### Exa
+### Exa
 
 ```typescript
 import { exa, webSearch } from '@plust/search-sdk';
@@ -122,7 +129,7 @@ const results = await webSearch({
 });
 ```
 
-#### Tavily
+### Tavily
 
 ```typescript
 import { tavily, webSearch } from '@plust/search-sdk';
@@ -140,7 +147,7 @@ const results = await webSearch({
 });
 ```
 
-#### SearXNG
+### SearXNG
 
 ```typescript
 import { searxng, webSearch } from '@plust/search-sdk';
@@ -162,13 +169,39 @@ const results = await webSearch({
 });
 ```
 
-## Debugging and Error Handling
+## Common Search Options
 
-The SDK provides powerful debugging capabilities to help you diagnose issues with your search requests.
+The `webSearch` function accepts these standard options across all providers:
 
-### Debug Mode
+| Option | Type | Description |
+|--------|------|-------------|
+| `query` | string | The search query text |
+| `maxResults` | number | Maximum number of results to return |
+| `language` | string | Language code for results (e.g., 'en') |
+| `region` | string | Country/region code (e.g., 'US') |
+| `safeSearch` | 'off' \| 'moderate' \| 'strict' | Content filtering level |
+| `page` | number | Result page number (for pagination) |
+| `timeout` | number | Request timeout in milliseconds |
 
-Enable debug mode to get detailed information about your search requests:
+## Search Result Format
+
+All providers return results in this standardized format:
+
+```typescript
+interface SearchResult {
+  url: string;         // The URL of the search result
+  title: string;       // Title of the web page
+  snippet?: string;    // Brief description or excerpt
+  domain?: string;     // The source website domain
+  publishedDate?: string; // When the content was published
+  provider?: string;   // The search provider that returned this result
+  raw?: unknown;       // Raw provider-specific data
+}
+```
+
+## Debugging
+
+The SDK includes built-in debugging capabilities to help diagnose issues:
 
 ```typescript
 import { google, webSearch } from '@plust/search-sdk';
@@ -187,25 +220,7 @@ const results = await webSearch({
 });
 ```
 
-### Improved Error Messages
-
-The SDK now provides detailed error messages with troubleshooting suggestions based on the specific error and provider. For example, instead of just seeing:
-
-```
-Search failed: Google search failed: Request failed with status: 400 Bad Request
-```
-
-You'll now get more helpful information like:
-
-```
-Search with provider 'google' failed: Google search failed: Request failed with status: 400 Bad Request - Invalid Value
-
-Troubleshooting: This is likely due to invalid request parameters. Check your query and other search options. Make sure your Google API key is valid and has the Custom Search API enabled. Also check if your Search Engine ID (cx) is correct.
-```
-
-### Using the Debug Utility Directly
-
-You can also use the exported debug utility for your own debugging needs:
+You can also use the debug utility directly:
 
 ```typescript
 import { debug } from '@plust/search-sdk';
@@ -214,9 +229,19 @@ import { debug } from '@plust/search-sdk';
 debug.log(options.debug, 'My debug message', { some: 'data' });
 ```
 
+## Error Handling
+
+The SDK provides detailed error messages with troubleshooting suggestions:
+
+```
+Search with provider 'google' failed: Google search failed: Request failed with status: 400 Bad Request - Invalid Value
+
+Troubleshooting: This is likely due to invalid request parameters. Check your query and other search options. Make sure your Google API key is valid and has the Custom Search API enabled. Also check if your Search Engine ID (cx) is correct.
+```
+
 ## API Reference
 
-### Main Functions
+### Main Function
 
 #### `webSearch(options: WebSearchOptions): Promise<SearchResult[]>`
 
@@ -232,36 +257,6 @@ const results = await webSearch({
   page: 1,
   provider: googleProvider
 });
-```
-
-### Common Search Options
-
-All search operations accept these standard options:
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `query` | string | The search query text |
-| `maxResults` | number | Maximum number of results to return |
-| `language` | string | Language code for results (e.g., 'en') |
-| `region` | string | Country/region code (e.g., 'US') |
-| `safeSearch` | 'off' \| 'moderate' \| 'strict' | Content filtering level |
-| `page` | number | Result page number (for pagination) |
-| `timeout` | number | Request timeout in milliseconds |
-
-### Search Result Format
-
-All providers return results in this standardized format:
-
-```typescript
-interface SearchResult {
-  url: string;         // The URL of the search result
-  title: string;       // Title of the web page
-  snippet?: string;    // Brief description or excerpt
-  domain?: string;     // The source website domain
-  publishedDate?: string; // When the content was published
-  provider?: string;   // The search provider that returned this result
-  raw?: unknown;       // Raw provider-specific data
-}
 ```
 
 ## License

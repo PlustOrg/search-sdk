@@ -56,6 +56,13 @@ function getTroubleshootingInfo(providerName: string, error: Error, statusCode?:
         suggestions = 'Check if your SearXNG instance URL is correct and that the server is running. Verify the format of your search URL.';
       }
       break;
+    case 'duckduckgo':
+      if (error.message.includes('vqd')) {
+        suggestions = 'Failed to extract the vqd parameter from DuckDuckGo. This may be due to temporary API changes or rate limiting. Try again later or consider using a different search type.';
+      } else if (statusCode === 429 || error.message.includes('rate')) {
+        suggestions = 'You may be making too many requests to DuckDuckGo. Try adding a delay between requests or reduce your request frequency.';
+      }
+      break;
     default:
       // Generic suggestions if no specific ones are available
       if (!suggestions) {
@@ -80,8 +87,9 @@ export async function webSearch(options: WebSearchOptions): Promise<SearchResult
     throw new Error('A search provider is required');
   }
   
-  if (!options.query) {
-    throw new Error('A search query is required');
+  // For Arxiv, idList can be used instead of query
+  if (!options.query && !(provider.name === 'arxiv' && options.idList)) {
+    throw new Error('A search query or ID list (for Arxiv) is required');
   }
   
   // Log search parameters if debugging is enabled

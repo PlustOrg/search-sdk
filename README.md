@@ -56,6 +56,8 @@ The SDK currently supports the following search APIs:
 - [Exa](https://exa.ai/)
 - [Tavily](https://tavily.com/)
 - [Custom SearXNG](https://docs.searxng.org/)
+- [Arxiv](https://arxiv.org/)
+- [DuckDuckGo](https://duckduckgo.com/)
 
 ## Provider Configuration
 
@@ -164,8 +166,65 @@ const searxngProvider = searxng.configure({
 
 const results = await webSearch({
   query: 'open source software',
-  maxResults: 10,
   provider: searxngProvider
+});
+```
+
+### DuckDuckGo
+
+```typescript
+import { duckduckgo, webSearch } from '@plust/search-sdk';
+
+// DuckDuckGo doesn't require an API key, but you can configure other options
+const duckduckgoProvider = duckduckgo.configure({
+  searchType: 'text', // Optional: 'text', 'images', or 'news'
+  useLite: false,     // Optional: use lite version for lower bandwidth
+  region: 'wt-wt'     // Optional: region code
+});
+
+// Text search
+const textResults = await webSearch({
+  query: 'privacy focused search',
+  maxResults: 10,
+  provider: duckduckgoProvider
+});
+
+// Image search
+const imageProvider = duckduckgo.configure({ searchType: 'images' });
+const imageResults = await webSearch({
+  query: 'landscape photography',
+  maxResults: 10,
+  provider: imageProvider
+});
+
+// News search
+const newsProvider = duckduckgo.configure({ searchType: 'news' });
+const newsResults = await webSearch({
+  query: 'latest technology',
+  maxResults: 10,
+  provider: newsProvider
+});
+```
+
+### Arxiv
+
+Arxiv is a repository of electronic preprints of scientific papers. It does not require an API key for its public API.
+
+```typescript
+import { arxiv, webSearch } from '@plust/search-sdk';
+
+// Arxiv doesn't require an API key, but you can configure other options.
+const arxivProvider = arxiv.configure({
+  sortBy: 'relevance', // Optional: 'relevance', 'lastUpdatedDate', 'submittedDate'
+  sortOrder: 'descending' // Optional: 'ascending', 'descending'
+});
+
+const results = await webSearch({
+  query: 'cat:cs.AI AND ti:transformer', // Example: Search for "transformer" in title within Computer Science AI category
+  // Alternatively, search by ID list:
+  // idList: '2305.12345v1,2203.01234v2', 
+  provider: arxivProvider,
+  maxResults: 5
 });
 ```
 
@@ -175,13 +234,18 @@ The `webSearch` function accepts these standard options across all providers:
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `query` | string | The search query text |
-| `maxResults` | number | Maximum number of results to return |
+| `query` | string | The search query text. For Arxiv, this can be a complex query using field prefixes (e.g., `au:del_maestro AND ti:checkerboard`). |
+| `idList` | string | (Arxiv specific) A comma-delimited list of Arxiv IDs to fetch. |
+| `maxResults` | number | Maximum number of results to return. |
 | `language` | string | Language code for results (e.g., 'en') |
-| `region` | string | Country/region code (e.g., 'US') |
-| `safeSearch` | 'off' \| 'moderate' \| 'strict' | Content filtering level |
-| `page` | number | Result page number (for pagination) |
-| `timeout` | number | Request timeout in milliseconds |
+| `region` | string | Country/region code (e.g., 'US'). For DuckDuckGo, use format like 'wt-wt', 'us-en'. |
+| `safeSearch` | 'off' \| 'moderate' \| 'strict' | Content filtering level (Not applicable to Arxiv). For DuckDuckGo, 'moderate' is default. |
+| `page` | number | Result page number (for pagination). Arxiv uses `start` (offset) instead. |
+| `start` | number | (Arxiv specific) The starting index for results (pagination offset). |
+| `sortBy` | 'relevance' \| 'lastUpdatedDate' \| 'submittedDate' | (Arxiv specific) Sort order for results. |
+| `sortOrder` | 'ascending' \| 'descending' | (Arxiv specific) Sort direction. |
+| `searchType` | 'text' \| 'images' \| 'news' | (DuckDuckGo specific) The type of search to perform. |
+| `timeout` | number | Request timeout in milliseconds. |
 
 ## Search Result Format
 
@@ -208,32 +272,17 @@ import { google, webSearch } from '@plust/search-sdk';
 
 const results = await webSearch({
   query: 'TypeScript SDK',
-  provider: googleProvider,
-  debug: {
-    enabled: true,           // Enable debug logging
-    logRequests: true,       // Log HTTP request details
-    logResponses: true,      // Log response data (excluding sensitive info)
-    logger: (msg, data) => { // Optional custom logger
-      console.log(`Custom logger: ${msg}`, data);
-    }
+  // provider: configuredGoogle, // Example provider
+  // debug: { enabled: true, logRequests: true, logResponses: true }
   }
 });
-```
-
-You can also use the debug utility directly:
-
-```typescript
-import { debug } from '@plust/search-sdk';
-
-// Log only if debugging is enabled in options
-debug.log(options.debug, 'My debug message', { some: 'data' });
 ```
 
 ## Error Handling
 
 The SDK provides detailed error messages with troubleshooting suggestions:
 
-```
+```text
 Search with provider 'google' failed: Google search failed: Request failed with status: 400 Bad Request - Invalid Value
 
 Troubleshooting: This is likely due to invalid request parameters. Check your query and other search options. Make sure your Google API key is valid and has the Custom Search API enabled. Also check if your Search Engine ID (cx) is correct.

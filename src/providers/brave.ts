@@ -100,6 +100,10 @@ export function createBraveProvider(config: BraveSearchConfig): SearchProvider {
       const offset = (page - 1) * maxResults;
       
       // Build query parameters
+      if (!query) {
+        throw new Error('Brave search requires a query.');
+      }
+
       const searchUrl = new URL(baseUrl);
       searchUrl.searchParams.append('q', query);
       searchUrl.searchParams.append('size', maxResults.toString());
@@ -127,7 +131,7 @@ export function createBraveProvider(config: BraveSearchConfig): SearchProvider {
       // Set up headers with API token
       const headers = {
         'Accept': 'application/json',
-        'X-Subscription-Token': config.apiKey,
+        'X-Subscription-Token': config.apiKey || '',
       };
       
       // Log request details if debugging is enabled

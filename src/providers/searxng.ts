@@ -57,7 +57,7 @@ export function createSearxNGProvider(config: SearxNGConfig): SearchProvider {
       
       // Build query parameters
       const searchUrl = new URL(config.baseUrl);
-      searchUrl.searchParams.append('q', query);
+      searchUrl.searchParams.append('q', query || '');
       searchUrl.searchParams.append('format', 'json');
       
       if (maxResults) {

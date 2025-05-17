@@ -111,7 +111,7 @@ export function createSerpApiProvider(config: SerpApiConfig): SearchProvider {
       
       // Log request details if debugging is enabled
       debug.logRequest(debugOptions, 'SerpAPI request', {
-        url: url.replace(config.apiKey, '***'),
+        url: config.apiKey ? url.replace(config.apiKey, '***') : url,
         params: {
           ...params,
           api_key: '***',

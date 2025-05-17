@@ -37,17 +37,25 @@ export interface DebugOptions {
  */
 export interface SearchOptions {
   /** The search query text */
-  query: string;
+  query?: string; // Made optional as Arxiv can use idList instead
+  /** (Arxiv specific) A comma-delimited list of Arxiv IDs to fetch. */
+  idList?: string;
   /** Maximum number of results to return */
   maxResults?: number;
   /** Language/locale for results */
   language?: string;
   /** Country/region for results */
   region?: string;
-  /** Safe search setting */
+  /** Safe search setting (Not universally applicable, e.g. Arxiv) */
   safeSearch?: 'off' | 'moderate' | 'strict';
-  /** Result page number (for pagination) */
+  /** Result page number (for pagination) - some providers might use offset instead */
   page?: number;
+  /** (Arxiv specific) The starting index for results (pagination offset). */
+  start?: number;
+  /** (Arxiv specific) Sort order for results. */
+  sortBy?: 'relevance' | 'lastUpdatedDate' | 'submittedDate';
+  /** (Arxiv specific) Sort direction. */
+  sortOrder?: 'ascending' | 'descending';
   /** Custom timeout in milliseconds */
   timeout?: number;
   /** Debug options */
@@ -71,7 +79,7 @@ export interface SearchProvider {
  */
 export interface ProviderConfig {
   /** API key or token */
-  apiKey: string;
+  apiKey?: string; // Made optional
   /** Base URL for API requests */
   baseUrl?: string;
   /** Additional provider-specific options */

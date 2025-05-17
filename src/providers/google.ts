@@ -136,7 +136,7 @@ export function createGoogleProvider(config: GoogleSearchConfig): SearchProvider
       
       // Log request details if debugging is enabled
       debug.logRequest(debugOptions, 'Google Search request', {
-        url: url.replace(config.apiKey, '***'),
+        url: config.apiKey ? url.replace(config.apiKey, '***') : url,
         params: {
           ...params,
           key: '***',

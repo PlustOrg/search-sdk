@@ -80,8 +80,8 @@ export function createTavilyProvider(config: TavilyConfig): SearchProvider {
       
       // Prepare request body
       const requestBody: TavilyRequestBody = {
-        api_key: config.apiKey,
-        query,
+        api_key: config.apiKey || '',
+        query: query || '',
         limit: maxResults,
         include_answer: config.includeAnswer || false,
         search_depth: config.searchDepth || 'basic',

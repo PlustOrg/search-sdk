@@ -1,95 +1,199 @@
 /**
- * Represents a web search result returned by any search provider
+ * Represents a web search result returned by any search provider.
+ * This interface standardizes the structure of search results from different sources.
  */
 export interface SearchResult {
-  /** URL of the search result */
+  /**
+   * The direct URL to the search result.
+   * @type {string}
+   */
   url: string;
-  /** Title of the web page */
+  /**
+   * The title of the web page.
+   * @type {string}
+   */
   title: string;
-  /** Snippet/description of the web page */
+  /**
+   * A brief summary or snippet of the web page's content.
+   * @type {string | undefined}
+   */
   snippet?: string;
-  /** The source website domain */
+  /**
+   * The domain name of the source website.
+   * @type {string | undefined}
+   */
   domain?: string;
-  /** When the result was published or last updated */
+  /**
+   * The date when the result was published or last updated, in ISO 8601 format.
+   * @type {string | undefined}
+   */
   publishedDate?: string;
-  /** The search provider that returned this result */
+  /**
+   * The name of the search provider that returned this result (e.g., 'google', 'bing').
+   * @type {string}
+   */
   provider: string;
-  /** Raw response data from the provider */
+  /**
+   * The raw, unprocessed response data from the search provider.
+   * The structure of this data is provider-specific.
+   * @type {unknown}
+   */
   raw?: unknown;
 }
 
 /**
- * Debug options for the search SDK
+ * Defines the configuration options for debugging within the search SDK.
+ * These options allow for detailed logging of search operations.
  */
 export interface DebugOptions {
-  /** Enable verbose logging */
+  /**
+   * If true, enables verbose logging throughout the search process.
+   * @type {boolean | undefined}
+   */
   enabled?: boolean;
-  /** Log request details (URLs, headers, etc.) */
+  /**
+   * If true, logs the details of HTTP requests made to search providers (e.g., URL, headers).
+   * @type {boolean | undefined}
+   */
   logRequests?: boolean;
-  /** Log full responses */
+  /**
+   * If true, logs the full, raw response bodies from search providers.
+   * @type {boolean | undefined}
+   */
   logResponses?: boolean;
-  /** Custom logger function */
+  /**
+   * A custom logger function to override the default console logging.
+   * @param {string} message The log message.
+   * @param {unknown} [data] Additional data to log.
+   * @returns {void}
+   */
   logger?: (message: string, data?: unknown) => void;
 }
 
 /**
- * Common options for web search across all providers
+ * Defines common search options applicable across all search providers.
+ * This interface provides a consistent way to specify search parameters.
  */
 export interface SearchOptions {
-  /** The search query text */
-  query?: string; // Made optional as Arxiv can use idList instead
-  /** (Arxiv specific) A comma-delimited list of Arxiv IDs to fetch. */
+  /**
+   * The search query string.
+   * This is optional for providers like Arxiv that can also search by ID list.
+   * @type {string | undefined}
+   */
+  query?: string;
+  /**
+   * A comma-separated list of Arxiv document IDs to fetch.
+   * This option is specific to the Arxiv provider.
+   * @type {string | undefined}
+   */
   idList?: string;
-  /** Maximum number of results to return */
+  /**
+   * The maximum number of search results to return.
+   * @type {number | undefined}
+   */
   maxResults?: number;
-  /** Language/locale for results */
+  /**
+   * The language and locale for the search results (e.g., 'en-US').
+   * @type {string | undefined}
+   */
   language?: string;
-  /** Country/region for results */
+  /**
+   * The country or region to tailor the search results for (e.g., 'US').
+   * @type {string | undefined}
+   */
   region?: string;
-  /** Safe search setting (Not universally applicable, e.g. Arxiv) */
+  /**
+   * The safe search level to filter explicit content.
+   * Note: Not all providers support this feature (e.g., Arxiv).
+   * @type {'off' | 'moderate' | 'strict' | undefined}
+   */
   safeSearch?: 'off' | 'moderate' | 'strict';
-  /** Result page number (for pagination) - some providers might use offset instead */
+  /**
+   * The page number of the search results for pagination.
+   * Some providers may use an offset-based approach instead.
+   * @type {number | undefined}
+   */
   page?: number;
-  /** (Arxiv specific) The starting index for results (pagination offset). */
+  /**
+   * The starting index for fetching results, used for pagination in providers like Arxiv.
+   * @type {number | undefined}
+   */
   start?: number;
-  /** (Arxiv specific) Sort order for results. */
+  /**
+   * The criteria for sorting Arxiv results.
+   * @type {'relevance' | 'lastUpdatedDate' | 'submittedDate' | undefined}
+   */
   sortBy?: 'relevance' | 'lastUpdatedDate' | 'submittedDate';
-  /** (Arxiv specific) Sort direction. */
+  /**
+   * The sort order direction for Arxiv results.
+   * @type {'ascending' | 'descending' | undefined}
+   */
   sortOrder?: 'ascending' | 'descending';
-  /** Custom timeout in milliseconds */
+  /**
+   * The maximum time in milliseconds to wait for a search provider to respond.
+   * @type {number | undefined}
+   */
   timeout?: number;
-  /** Debug options */
+  /**
+   * Debugging options for this specific search request.
+   * @type {DebugOptions | undefined}
+   */
   debug?: DebugOptions;
 }
 
 /**
- * Interface that all search provider implementations must satisfy
+ * An interface that all search provider implementations must satisfy.
+ * This ensures a consistent contract for interacting with different search APIs.
  */
 export interface SearchProvider {
-  /** Name of the search provider */
+  /**
+   * The unique name of the search provider (e.g., 'google', 'bing').
+   * @type {string}
+   */
   name: string;
-  /** Search method implementation */
+  /**
+   * The method that executes the search query.
+   * @param {SearchOptions} options The search parameters.
+   * @returns {Promise<SearchResult[]>} A promise that resolves to an array of search results.
+   */
   search: (options: SearchOptions) => Promise<SearchResult[]>;
-  /** API configuration for the provider */
+  /**
+   * The configuration object for the search provider, including API keys and base URLs.
+   * @type {ProviderConfig}
+   */
   config: ProviderConfig;
 }
 
 /**
- * Provider configuration options
+ * Defines the configuration options for a search provider.
+ * This includes credentials and other provider-specific settings.
  */
 export interface ProviderConfig {
-  /** API key or token */
-  apiKey?: string; // Made optional
-  /** Base URL for API requests */
+  /**
+   * The API key or access token for authenticating with the search provider.
+   * @type {string | undefined}
+   */
+  apiKey?: string;
+  /**
+   * The base URL for the search provider's API.
+   * @type {string | undefined}
+   */
   baseUrl?: string;
-  /** Additional provider-specific options */
+  /**
+   * A flexible property to hold any additional, provider-specific configuration options.
+   * @type {any}
+   */
   [key: string]: unknown;
 }
 
 /**
- * Options for the main webSearch function
+ * Defines the options for the main `webSearch` function.
+ * This extends the common `SearchOptions` with the requirement of at least one search provider.
  */
 export interface WebSearchOptions extends SearchOptions {
-  /** Array of search providers to query in parallel */
+  /**
+   * An array of one or more configured search providers to query in parallel.
+   * @type {SearchProvider[]}
+   */
   provider: SearchProvider[];
 }

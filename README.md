@@ -4,7 +4,7 @@ A unified TypeScript SDK for integrating with multiple web search providers thro
 
 ## Overview
 
-The Search SDK provides a standardized way to interact with various search APIs, allowing developers to easily switch between providers or use multiple providers simultaneously without changing application code.
+The Search SDK provides a standardized way to interact with various search APIs, allowing developers to easily switch between providers or use multiple providers simultaneously without changing application code. It's designed for simplicity, flexibility, and robust error handling.
 
 ## Installation
 
@@ -17,38 +17,39 @@ npm install @plust/search-sdk
 ```typescript
 import { google, webSearch } from '@plust/search-sdk';
 
-// Configure the Google search provider with your API key and Search Engine ID
-const configuredGoogle = google.configure({
+// Configure the Google search provider
+const googleProvider = google.configure({
   apiKey: 'YOUR_GOOGLE_API_KEY',
   cx: 'YOUR_SEARCH_ENGINE_ID'
 });
 
-// Search using the configured provider
-async function search() {
-  const results = await webSearch({
-    query: 'TypeScript SDK',
-    maxResults: 5,
-    provider: configuredGoogle
-  });
-  
-  console.log(results);
+// Perform a search
+async function main() {
+  try {
+    const results = await webSearch({
+      query: 'TypeScript SDK',
+      provider: [googleProvider]
+    });
+
+    console.log(results);
+  } catch (error) {
+    console.error('Search failed:', error);
+  }
 }
 
-search();
+main();
 ```
 
 ## Key Features
 
-- Unified API for working with multiple search providers
-- Standardized result format across all providers
-- Comprehensive type safety with TypeScript
-- Configurable search parameters (pagination, safe search, language, etc.)
-- Detailed error handling with provider-specific troubleshooting
-- Built-in debugging capabilities
+- **Unified API**: A single `webSearch` function for all supported providers.
+- **Standardized Results**: Search results are mapped to a consistent `SearchResult` interface.
+- **TypeScript Support**: Strong typing for all configurations, options, and results.
+- **Parallel Searching**: Query multiple providers at once.
+- **Detailed Error Handling**: Errors include provider-specific troubleshooting tips.
+- **Built-in Debugging**:- LLog requests, responses, and internal operations.
 
 ## Supported Search Providers
-
-The SDK currently supports the following search APIs:
 
 - [Google Custom Search](https://developers.google.com/custom-search/v1/overview)
 - [SerpAPI](https://serpapi.com/)
@@ -59,254 +60,106 @@ The SDK currently supports the following search APIs:
 - [Arxiv](https://arxiv.org/)
 - [DuckDuckGo](https://duckduckgo.com/)
 
-## Provider Configuration
+## Usage
 
-Each search provider needs to be configured before use:
+### Configuring Providers
 
-### Google Custom Search
+Each search provider must be configured before use.
 
 ```typescript
-import { google, webSearch } from '@plust/search-sdk';
+import { google, brave, serpapi } from '@plust/search-sdk';
 
 const googleProvider = google.configure({
   apiKey: 'YOUR_GOOGLE_API_KEY',
   cx: 'YOUR_SEARCH_ENGINE_ID'
 });
 
-const results = await webSearch({
-  query: 'React hooks tutorial',
-  maxResults: 10,
-  provider: googleProvider
-});
-```
-
-### SerpAPI
-
-```typescript
-import { serpapi, webSearch } from '@plust/search-sdk';
-
-const serpProvider = serpapi.configure({
-  apiKey: 'YOUR_SERPAPI_KEY',
-  engine: 'google' // Optional, defaults to 'google'
-});
-
-const results = await webSearch({
-  query: 'TypeScript best practices',
-  maxResults: 10,
-  provider: serpProvider
-});
-```
-
-### Brave Search
-
-```typescript
-import { brave, webSearch } from '@plust/search-sdk';
-
 const braveProvider = brave.configure({
   apiKey: 'YOUR_BRAVE_API_KEY'
 });
 
-const results = await webSearch({
-  query: 'privacy-focused browsers',
-  maxResults: 10,
-  safeSearch: 'moderate',
-  provider: braveProvider
+const serpapiProvider = serpapi.configure({
+  apiKey: 'YOUR_SERPAPI_KEY',
+  engine: 'bing' // Optional: specify engine, defaults to 'google'
 });
 ```
 
-### Exa
+### Performing a Search
+
+Pass one or more configured providers to the `webSearch` function.
 
 ```typescript
-import { exa, webSearch } from '@plust/search-sdk';
-
-const exaProvider = exa.configure({
-  apiKey: 'YOUR_EXA_API_KEY',
-  model: 'keyword', // Optional, defaults to 'keyword'
-  includeContents: true // Optional, defaults to false
-});
+import { webSearch } from '@plust/search-sdk';
 
 const results = await webSearch({
-  query: 'machine learning papers',
-  provider: exaProvider
-});
-```
-
-### Tavily
-
-```typescript
-import { tavily, webSearch } from '@plust/search-sdk';
-
-const tavilyProvider = tavily.configure({
-  apiKey: 'YOUR_TAVILY_API_KEY',
-  searchDepth: 'comprehensive', // Optional, defaults to 'basic'
-  includeAnswer: true // Optional, defaults to false
-});
-
-const results = await webSearch({
-  query: 'climate change evidence',
-  maxResults: 15,
-  provider: tavilyProvider
-});
-```
-
-### SearXNG
-
-```typescript
-import { searxng, webSearch } from '@plust/search-sdk';
-
-const searxngProvider = searxng.configure({
-  baseUrl: 'http://127.0.0.1:8080/search',
-  additionalParams: {
-    // Optional additional parameters for SearXNG
-    categories: 'general',
-    engines: 'google,brave,duckduckgo'
-  },
-  apiKey: '' // Not needed for most SearXNG instances
-});
-
-const results = await webSearch({
-  query: 'open source software',
-  provider: searxngProvider
-});
-```
-
-### DuckDuckGo
-
-```typescript
-import { duckduckgo, webSearch } from '@plust/search-sdk';
-
-// DuckDuckGo doesn't require an API key, but you can configure other options
-const duckduckgoProvider = duckduckgo.configure({
-  searchType: 'text', // Optional: 'text', 'images', or 'news'
-  useLite: false,     // Optional: use lite version for lower bandwidth
-  region: 'wt-wt'     // Optional: region code
-});
-
-// Text search
-const textResults = await webSearch({
-  query: 'privacy focused search',
-  maxResults: 10,
-  provider: duckduckgoProvider
-});
-
-// Image search
-const imageProvider = duckduckgo.configure({ searchType: 'images' });
-const imageResults = await webSearch({
-  query: 'landscape photography',
-  maxResults: 10,
-  provider: imageProvider
-});
-
-// News search
-const newsProvider = duckduckgo.configure({ searchType: 'news' });
-const newsResults = await webSearch({
-  query: 'latest technology',
-  maxResults: 10,
-  provider: newsProvider
-});
-```
-
-### Arxiv
-
-Arxiv is a repository of electronic preprints of scientific papers. It does not require an API key for its public API.
-
-```typescript
-import { arxiv, webSearch } from '@plust/search-sdk';
-
-// Arxiv doesn't require an API key, but you can configure other options.
-const arxivProvider = arxiv.configure({
-  sortBy: 'relevance', // Optional: 'relevance', 'lastUpdatedDate', 'submittedDate'
-  sortOrder: 'descending' // Optional: 'ascending', 'descending'
-});
-
-const results = await webSearch({
-  query: 'cat:cs.AI AND ti:transformer', // Example: Search for "transformer" in title within Computer Science AI category
-  // Alternatively, search by ID list:
-  // idList: '2305.12345v1,2203.01234v2', 
-  provider: arxivProvider,
+  query: 'best frontend frameworks',
+  provider: [googleProvider, braveProvider], // Search multiple providers
   maxResults: 5
 });
 ```
 
 ## Common Search Options
 
-The `webSearch` function accepts these standard options across all providers:
+The `webSearch` function accepts these options:
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `query` | string | The search query text. For Arxiv, this can be a complex query using field prefixes (e.g., `au:del_maestro AND ti:checkerboard`). |
-| `idList` | string | (Arxiv specific) A comma-delimited list of Arxiv IDs to fetch. |
-| `maxResults` | number | Maximum number of results to return. |
-| `language` | string | Language code for results (e.g., 'en') |
-| `region` | string | Country/region code (e.g., 'US'). For DuckDuckGo, use format like 'wt-wt', 'us-en'. |
-| `safeSearch` | 'off' \| 'moderate' \| 'strict' | Content filtering level (Not applicable to Arxiv). For DuckDuckGo, 'moderate' is default. |
-| `page` | number | Result page number (for pagination). Arxiv uses `start` (offset) instead. |
-| `start` | number | (Arxiv specific) The starting index for results (pagination offset). |
-| `sortBy` | 'relevance' \| 'lastUpdatedDate' \| 'submittedDate' | (Arxiv specific) Sort order for results. |
-| `sortOrder` | 'ascending' \| 'descending' | (Arxiv specific) Sort direction. |
-| `searchType` | 'text' \| 'images' \| 'news' | (DuckDuckGo specific) The type of search to perform. |
-| `timeout` | number | Request timeout in milliseconds. |
+| Option       | Type                                           | Description                                                                                             |
+|--------------|------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| `query`      | `string`                                       | The search query.                                                                                       |
+| `maxResults` | `number`                                       | The maximum number of results to return.                                                                |
+| `page`       | `number`                                       | The page number for pagination.                                                                         |
+| `language`   | `string`                                       | The language for the search results (e.g., 'en-US').                                                     |
+| `region`     | `string`                                       | The country or region to tailor results for (e.g., 'US').                                                |
+| `safeSearch` | `'off' \| 'moderate' \| 'strict'`              | The safe search level for filtering content.                                                            |
+| `timeout`    | `number`                                       | The maximum time in milliseconds to wait for a provider to respond.                                     |
+| `idList`     | `string`                                       | **(Arxiv)** A comma-separated list of Arxiv document IDs to fetch.                                        |
+| `sortBy`     | `'relevance' \| 'lastUpdatedDate' \| 'submittedDate'` | **(Arxiv)** The sorting criteria for Arxiv results.                                               |
+| `searchType` | `'text' \| 'images' \| 'news'`                 | **(DuckDuckGo)** The type of search to perform.                                                           |
 
 ## Search Result Format
 
-All providers return results in this standardized format:
+All providers return results in this standardized `SearchResult` format:
 
 ```typescript
 interface SearchResult {
-  url: string;         // The URL of the search result
-  title: string;       // Title of the web page
-  snippet?: string;    // Brief description or excerpt
-  domain?: string;     // The source website domain
-  publishedDate?: string; // When the content was published
-  provider?: string;   // The search provider that returned this result
-  raw?: unknown;       // Raw provider-specific data
+  url: string;
+  title: string;
+  snippet?: string;
+  domain?: string;
+  publishedDate?: string;
+  provider: string;
+  raw?: unknown; // The original, unprocessed result from the provider
 }
-```
-
-## Debugging
-
-The SDK includes built-in debugging capabilities to help diagnose issues:
-
-```typescript
-import { google, webSearch } from '@plust/search-sdk';
-
-const results = await webSearch({
-  query: 'TypeScript SDK',
-  // provider: configuredGoogle, // Example provider
-  // debug: { enabled: true, logRequests: true, logResponses: true }
-  }
-});
 ```
 
 ## Error Handling
 
-The SDK provides detailed error messages with troubleshooting suggestions:
+The SDK is designed to handle errors gracefully. If one provider in a multi-provider search fails, the others will still return results. If all providers fail, a detailed error is thrown.
 
 ```text
-Search with provider 'google' failed: Google search failed: Request failed with status: 400 Bad Request - Invalid Value
+Search with provider 'google' failed: Request failed with status: 403 Forbidden
 
-Troubleshooting: This is likely due to invalid request parameters. Check your query and other search options. Make sure your Google API key is valid and has the Custom Search API enabled. Also check if your Search Engine ID (cx) is correct.
+Troubleshooting: This is likely an authentication issue. Check your API key and ensure it has the correct permissions. Make sure your Google API key is valid and the Custom Search API is enabled. Also, check if your Search Engine ID (cx) is correct.
 ```
 
-## API Reference
+## Debugging
 
-### Main Function
-
-#### `webSearch(options: WebSearchOptions): Promise<SearchResult[]>`
-
-Performs a web search using the specified provider and options.
+Enable debugging to get detailed logs of the search process.
 
 ```typescript
 const results = await webSearch({
-  query: 'TypeScript tutorial',
-  maxResults: 10,
-  language: 'en',
-  region: 'US',
-  safeSearch: 'moderate',
-  page: 1,
-  provider: googleProvider
+  query: 'TypeScript SDK',
+  provider: [googleProvider],
+  debug: {
+    enabled: true,      // Enable basic logging
+    logRequests: true,  // Log HTTP request details
+    logResponses: true  // Log full HTTP response bodies
+  }
 });
 ```
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request on our [GitHub repository](https://github.com/plust/search-sdk).
 
 ## License
 

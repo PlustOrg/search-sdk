@@ -13,7 +13,7 @@ export interface SearchResult {
   /** When the result was published or last updated */
   publishedDate?: string;
   /** The search provider that returned this result */
-  provider?: string;
+  provider: string;
   /** Raw response data from the provider */
   raw?: unknown;
 }
@@ -90,6 +90,6 @@ export interface ProviderConfig {
  * Options for the main webSearch function
  */
 export interface WebSearchOptions extends SearchOptions {
-  /** Search provider to use */
-  provider: SearchProvider;
+  /** Array of search providers to query in parallel */
+  provider: SearchProvider[];
 }

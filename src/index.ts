@@ -74,81 +74,112 @@ function getTroubleshootingInfo(providerName: string, error: Error, statusCode?:
 }
 
 /**
- * Main search function that queries a web search provider and returns standardized results
- * 
- * @param options Search options including provider, query and other parameters
- * @returns Promise that resolves to an array of search results
+ * Main search function that queries one or more web search providers and returns standardized results
+ *
+ * @param options Search options including provider(s), query and other parameters
+ * @returns Promise that resolves to an array of search results from all providers
  */
 export async function webSearch(options: WebSearchOptions): Promise<SearchResult[]> {
   const { provider, debug: debugOptions, ...searchOptions } = options;
-  
+
   // Validate required options
-  if (!provider) {
-    throw new Error('A search provider is required');
+  if (!provider || provider.length === 0) {
+    throw new Error('At least one search provider is required');
   }
-  
-  // For Arxiv, idList can be used instead of query
-  if (!options.query && !(provider.name === 'arxiv' && options.idList)) {
+
+  // Validate that at least one provider supports the search query
+  const hasArxivProvider = provider.some(p => p.name === 'arxiv');
+  if (!options.query && !(hasArxivProvider && options.idList)) {
     throw new Error('A search query or ID list (for Arxiv) is required');
   }
-  
+
   // Log search parameters if debugging is enabled
-  debug.log(debugOptions, `Performing search with provider: ${provider.name}`, {
+  debug.log(debugOptions, `Performing search with ${provider.length} provider(s): ${provider.map(p => p.name).join(', ')}`, {
     query: options.query,
     maxResults: options.maxResults,
-    provider: provider.name,
-    providerConfig: { ...provider.config, apiKey: provider.config.apiKey ? '***' : undefined },
+    providers: provider.map(p => p.name),
   });
-  
-  try {
-    // Forward debug options to the provider's search method
-    const results = await provider.search({ ...searchOptions, debug: debugOptions });
-    
-    // Log results if debugging is enabled
-    debug.logResponse(debugOptions, `Received ${results.length} results from ${provider.name}`);
-    
-    return results;
-  } catch (error) {
-    // Extract more information for better error messages
-    let statusCode: number | undefined;
-    let errorMessage = '';
-    
-    if (error instanceof HttpError) {
-      statusCode = error.statusCode;
-      errorMessage = error.message;
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
+
+  // Execute searches in parallel with Promise.allSettled for fail-soft behavior
+  const searchPromises = provider.map(async (p) => {
+    try {
+      const results = await p.search({ ...searchOptions, debug: debugOptions });
+
+      // Log results if debugging is enabled
+      debug.logResponse(debugOptions, `Received ${results.length} results from ${p.name}`);
+
+      return { provider: p.name, results, error: null };
+    } catch (error) {
+      // Extract more information for better error messages
+      let statusCode: number | undefined;
+      let errorMessage = '';
+
+      if (error instanceof HttpError) {
+        statusCode = error.statusCode;
+        errorMessage = error.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = String(error);
+      }
+
+      // Get troubleshooting information
+      const troubleshooting = getTroubleshootingInfo(p.name,
+        error instanceof Error ? error : new Error(String(error)),
+        statusCode);
+
+      // Create a detailed error message
+      let detailedErrorMessage = `Search with provider '${p.name}' failed: ${errorMessage}`;
+
+      if (troubleshooting && troubleshooting.trim() !== '') {
+        detailedErrorMessage += `\n\nTroubleshooting: ${troubleshooting}`;
+      }
+
+      const detailedError = new Error(detailedErrorMessage);
+
+      // Log error details if debugging is enabled
+      debug.log(debugOptions, `Search error with provider ${p.name}`, {
+        error: errorMessage,
+        statusCode,
+        troubleshooting,
+        provider: p.name,
+        query: options.query,
+        rawError: error instanceof HttpError ? error.parsedResponseBody : undefined
+      });
+
+      return { provider: p.name, results: [], error: detailedError };
+    }
+  });
+
+  // Wait for all searches to complete
+  const searchResults = await Promise.all(searchPromises);
+
+  // Collect all successful results
+  const allResults: SearchResult[] = [];
+  const errors: string[] = [];
+
+  for (const { provider: providerName, results, error } of searchResults) {
+    if (error) {
+      errors.push(error.message);
+      debug.log(debugOptions, `Provider ${providerName} failed`, { error: error.message });
     } else {
-      errorMessage = String(error);
+      allResults.push(...results);
     }
-    
-    // Get troubleshooting information
-    const troubleshooting = getTroubleshootingInfo(provider.name, 
-      error instanceof Error ? error : new Error(String(error)), 
-      statusCode);
-    
-    // Create a detailed error message that ensures troubleshooting is included
-    let detailedErrorMessage = `Search with provider '${provider.name}' failed: ${errorMessage}`;
-    
-    // Only add the diagnostic info and troubleshooting if they exist
-    if (troubleshooting && troubleshooting.trim() !== '') {
-      detailedErrorMessage += `\n\nTroubleshooting: ${troubleshooting}`;
-    }
-    
-    const detailedError = new Error(detailedErrorMessage);
-    
-    // Log error details if debugging is enabled
-    debug.log(debugOptions, `Search error with provider ${provider.name}`, {
-      error: errorMessage,
-      statusCode,
-      troubleshooting,
-      provider: provider.name,
-      query: options.query,
-      rawError: error instanceof HttpError ? error.parsedResponseBody : undefined
-    });
-    
-    throw detailedError;
   }
+
+  // Log summary
+  debug.log(debugOptions, `Search complete: ${allResults.length} total results from ${searchResults.filter(r => !r.error).length}/${provider.length} providers`, {
+    totalResults: allResults.length,
+    successfulProviders: searchResults.filter(r => !r.error).length,
+    failedProviders: errors.length,
+  });
+
+  // If all providers failed, throw an error with all the error messages
+  if (allResults.length === 0 && errors.length > 0) {
+    throw new Error(`All ${provider.length} provider(s) failed:\n\n${errors.join('\n\n')}`);
+  }
+
+  return allResults;
 }
 
 // Export type definitions

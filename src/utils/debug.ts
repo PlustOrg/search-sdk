@@ -1,8 +1,7 @@
 import { DebugOptions } from '../types';
 
 /**
- * @internal
- * Default debug options used when no custom options are provided.
+ * Default debug options
  */
 const defaultDebugOptions: DebugOptions = {
   enabled: false,
@@ -18,17 +17,15 @@ const defaultDebugOptions: DebugOptions = {
 };
 
 /**
- * A utility object for handling debugging and logging within the SDK.
- * This object provides methods to log messages, requests, and responses
- * based on the provided {@link DebugOptions}.
+ * Debug utility for the search SDK
  */
 export const debug = {
   /**
-   * Logs a general message if debugging is enabled.
-   *
-   * @param {DebugOptions | undefined} options - The debug options from the search request.
-   * @param {string} message - The message to log.
-   * @param {unknown} [data] - Optional data to include with the log entry.
+   * Log a message if debugging is enabled
+   * 
+   * @param options Debug options from search request
+   * @param message Message to log
+   * @param data Optional data to log
    */
   log(options: DebugOptions | undefined, message: string, data?: unknown): void {
     const opts = { ...defaultDebugOptions, ...options };
@@ -41,11 +38,11 @@ export const debug = {
   },
 
   /**
-   * Logs HTTP request details if debugging and request logging are enabled.
-   *
-   * @param {DebugOptions | undefined} options - The debug options from the search request.
-   * @param {string} message - A descriptive message for the request being logged.
-   * @param {unknown} [data] - Optional data related to the request (e.g., headers, body).
+   * Log request details if request logging is enabled
+   * 
+   * @param options Debug options from search request
+   * @param message Message to log
+   * @param data Request details to log
    */
   logRequest(options: DebugOptions | undefined, message: string, data?: unknown): void {
     const opts = { ...defaultDebugOptions, ...options };
@@ -58,11 +55,11 @@ export const debug = {
   },
 
   /**
-   * Logs HTTP response details if debugging and response logging are enabled.
-   *
-   * @param {DebugOptions | undefined} options - The debug options from the search request.
-   * @param {string} message - A descriptive message for the response being logged.
-   * @param {unknown} [data] - Optional data related to the response (e.g., status code, body).
+   * Log response details if response logging is enabled
+   * 
+   * @param options Debug options from search request
+   * @param message Message to log
+   * @param data Response details to log
    */
   logResponse(options: DebugOptions | undefined, message: string, data?: unknown): void {
     const opts = { ...defaultDebugOptions, ...options };

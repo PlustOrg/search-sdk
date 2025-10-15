@@ -28,7 +28,7 @@ async function search() {
   const results = await webSearch({
     query: 'TypeScript SDK',
     maxResults: 5,
-    provider: configuredGoogle
+    provider: [configuredGoogle]  // Provider is now an array
   });
   
   console.log(results);
@@ -36,6 +36,42 @@ async function search() {
 
 search();
 ```
+
+### Using Multiple Providers
+
+You can query multiple search providers simultaneously for better coverage and reliability:
+
+```typescript
+import { google, brave, webSearch } from '@plust/search-sdk';
+
+const googleProvider = google.configure({
+  apiKey: 'YOUR_GOOGLE_API_KEY',
+  cx: 'YOUR_SEARCH_ENGINE_ID'
+});
+
+const braveProvider = brave.configure({
+  apiKey: 'YOUR_BRAVE_API_KEY'
+});
+
+// Search with multiple providers in parallel
+async function search() {
+  const results = await webSearch({
+    query: 'TypeScript SDK',
+    maxResults: 10,
+    provider: [googleProvider, braveProvider]  // Multiple providers
+  });
+  
+  // Results from all successful providers are combined
+  console.log(`Found ${results.length} total results`);
+}
+
+search();
+```
+
+**Benefits of using multiple providers:**
+- **Fail-soft behavior**: If one provider fails, others can still return results
+- **Better coverage**: Combine results from multiple sources
+- **Redundancy**: Protection against API downtime or rate limits
 
 ## Key Features
 
@@ -76,7 +112,7 @@ const googleProvider = google.configure({
 const results = await webSearch({
   query: 'React hooks tutorial',
   maxResults: 10,
-  provider: googleProvider
+  provider: [googleProvider]
 });
 ```
 
@@ -93,7 +129,7 @@ const serpProvider = serpapi.configure({
 const results = await webSearch({
   query: 'TypeScript best practices',
   maxResults: 10,
-  provider: serpProvider
+  provider: [serpProvider]
 });
 ```
 
@@ -110,7 +146,7 @@ const results = await webSearch({
   query: 'privacy-focused browsers',
   maxResults: 10,
   safeSearch: 'moderate',
-  provider: braveProvider
+  provider: [braveProvider]
 });
 ```
 
@@ -127,7 +163,7 @@ const exaProvider = exa.configure({
 
 const results = await webSearch({
   query: 'machine learning papers',
-  provider: exaProvider
+  provider: [exaProvider]
 });
 ```
 
@@ -145,7 +181,7 @@ const tavilyProvider = tavily.configure({
 const results = await webSearch({
   query: 'climate change evidence',
   maxResults: 15,
-  provider: tavilyProvider
+  provider: [tavilyProvider]
 });
 ```
 
@@ -166,7 +202,7 @@ const searxngProvider = searxng.configure({
 
 const results = await webSearch({
   query: 'open source software',
-  provider: searxngProvider
+  provider: [searxngProvider]
 });
 ```
 
@@ -186,7 +222,7 @@ const duckduckgoProvider = duckduckgo.configure({
 const textResults = await webSearch({
   query: 'privacy focused search',
   maxResults: 10,
-  provider: duckduckgoProvider
+  provider: [duckduckgoProvider]
 });
 
 // Image search
@@ -194,7 +230,7 @@ const imageProvider = duckduckgo.configure({ searchType: 'images' });
 const imageResults = await webSearch({
   query: 'landscape photography',
   maxResults: 10,
-  provider: imageProvider
+  provider: [imageProvider]
 });
 
 // News search
@@ -202,7 +238,7 @@ const newsProvider = duckduckgo.configure({ searchType: 'news' });
 const newsResults = await webSearch({
   query: 'latest technology',
   maxResults: 10,
-  provider: newsProvider
+  provider: [newsProvider]
 });
 ```
 
@@ -223,7 +259,7 @@ const results = await webSearch({
   query: 'cat:cs.AI AND ti:transformer', // Example: Search for "transformer" in title within Computer Science AI category
   // Alternatively, search by ID list:
   // idList: '2305.12345v1,2203.01234v2', 
-  provider: arxivProvider,
+  provider: [arxivProvider],
   maxResults: 5
 });
 ```
@@ -270,11 +306,15 @@ The SDK includes built-in debugging capabilities to help diagnose issues:
 ```typescript
 import { google, webSearch } from '@plust/search-sdk';
 
+const googleProvider = google.configure({
+  apiKey: 'YOUR_GOOGLE_API_KEY',
+  cx: 'YOUR_SEARCH_ENGINE_ID'
+});
+
 const results = await webSearch({
   query: 'TypeScript SDK',
-  // provider: configuredGoogle, // Example provider
-  // debug: { enabled: true, logRequests: true, logResponses: true }
-  }
+  provider: [googleProvider],
+  debug: { enabled: true, logRequests: true, logResponses: true }
 });
 ```
 
@@ -304,7 +344,7 @@ const results = await webSearch({
   region: 'US',
   safeSearch: 'moderate',
   page: 1,
-  provider: googleProvider
+  provider: [googleProvider]
 });
 ```
 

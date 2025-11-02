@@ -21,7 +21,16 @@
     "url": "https://github.com/PlustOrg/search-sdk/issues"
   },
   "homepage": "https://github.com/PlustOrg/search-sdk#readme",
-  "keywords": ["search", "api", "sdk", "typescript", "web search"],
+  "keywords": [
+    "search",
+    "api",
+    "sdk",
+    "typescript",
+    "web search",
+    "mcp",
+    "agent",
+    "fastmcp"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -35,6 +44,7 @@
   },
   "dependencies": {
     "cross-fetch": "^3.1.5",
+    "fastmcp": "^3.19.2",
     "xml2js": "^0.6.2"
   }
 }

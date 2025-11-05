@@ -356,7 +356,7 @@ const mcpConfig = asMcp([googleProvider, braveProvider]);
 console.log(mcpConfig);
 // {
 //   command: 'node',
-//   args: ['/path/to/cli.js'],
+//   args: ['<package_path>/dist/mcp/cli.js'],
 //   env: {
 //     SEARCH_SDK_MCP_CONFIG: '{"providers":[...]}'
 //   }
@@ -365,7 +365,7 @@ console.log(mcpConfig);
 
 #### Method 2: Running the MCP Server Directly
 
-You can also run the MCP server directly using environment variables:
+You can also run the MCP server directly by invoking the CLI script with Node.js:
 
 ```bash
 # Set up your configuration
@@ -387,8 +387,8 @@ export SEARCH_SDK_MCP_CONFIG='{
   ]
 }'
 
-# Run the MCP server
-npx @plust/search-sdk-mcp
+# Run the MCP server (from within your node_modules)
+node node_modules/@plust/search-sdk/dist/mcp/cli.js
 ```
 
 The MCP server will start and communicate over stdio, making it compatible with any MCP client.
@@ -420,8 +420,8 @@ Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/
 {
   "mcpServers": {
     "search-sdk": {
-      "command": "npx",
-      "args": ["@plust/search-sdk-mcp"],
+      "command": "node",
+      "args": ["node_modules/@plust/search-sdk/dist/mcp/cli.js"],
       "env": {
         "SEARCH_SDK_MCP_CONFIG": "{\"providers\":[{\"name\":\"brave\",\"config\":{\"apiKey\":\"YOUR_API_KEY\"}}]}"
       }

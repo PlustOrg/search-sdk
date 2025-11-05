@@ -356,7 +356,7 @@ const mcpConfig = asMcp([googleProvider, braveProvider]);
 console.log(mcpConfig);
 // {
 //   command: 'node',
-//   args: ['<package_path>/dist/mcp/cli.js'],
+//   args: ['node_modules/@plust/search-sdk/dist/mcp/cli.js'],
 //   env: {
 //     SEARCH_SDK_MCP_CONFIG: '{"providers":[...]}'
 //   }
@@ -402,7 +402,7 @@ When running as an MCP server, the following tool is exposed:
 Performs a web search across all configured providers.
 
 **Parameters:**
-- `query` (string, required): The search query string
+- `query` (string, required): The search query
 - `maxResults` (number, optional): Maximum number of results to return
 - `region` (string, optional): Country code for regional results (e.g., "US")
 - `language` (string, optional): Language code for results (e.g., "en-US")
@@ -429,6 +429,8 @@ Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/
   }
 }
 ```
+
+**Note:** The path assumes the package is installed in your project's `node_modules`. Adjust the path if using a different installation method or directory structure.
 
 #### Stagehand
 

@@ -1,6 +1,6 @@
 {
   "name": "@plust/search-sdk",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "TypeScript SDK for web search providers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -40,7 +40,7 @@
     "@typescript-eslint/parser": "^5.30.0",
     "eslint": "^8.18.0",
     "prettier": "^2.7.1",
-    "typescript": "^4.7.4"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "cross-fetch": "^3.1.5",

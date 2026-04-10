@@ -63,6 +63,15 @@ function getTroubleshootingInfo(providerName: string, error: Error, statusCode?:
         suggestions = 'You may be making too many requests to DuckDuckGo. Try adding a delay between requests or reduce your request frequency.';
       }
       break;
+    case 'perplexity':
+      if (error.message.includes('api_key') || error.message.includes('apiKey')) {
+        suggestions = 'Check your Perplexity API key. Make sure it\'s valid and has the correct permissions for the Search API.';
+      } else if (statusCode === 429) {
+        suggestions = 'You have exceeded your Perplexity API quota or rate limits. Check your usage in your Perplexity account dashboard.';
+      } else if (statusCode === 400) {
+        suggestions = 'Check your search parameters for the Perplexity API. Ensure max_results is between 1-20, and date formats are correct (MM/DD/YYYY).';
+      }
+      break;
     default:
       // Generic suggestions if no specific ones are available
       if (!suggestions) {

@@ -95,6 +95,7 @@ The SDK currently supports the following search APIs:
 - [Custom SearXNG](https://docs.searxng.org/)
 - [Arxiv](https://arxiv.org/)
 - [DuckDuckGo](https://duckduckgo.com/)
+- [Perplexity](https://docs.perplexity.ai/)
 
 ## Provider Configuration
 
@@ -262,6 +263,30 @@ const results = await webSearch({
   // idList: '2305.12345v1,2203.01234v2', 
   provider: [arxivProvider],
   maxResults: 5
+});
+```
+
+### Perplexity
+
+```typescript
+import { perplexity, webSearch } from '@plust/search-sdk';
+
+const perplexityProvider = perplexity.configure({
+  apiKey: 'YOUR_PERPLEXITY_API_KEY',
+  maxTokens: 25000, // Optional: maximum total tokens of webpage content returned
+  maxTokensPerPage: 2048, // Optional: maximum tokens retrieved from each webpage
+  country: 'US' // Optional: country code to filter results by location. Use ISO 3166-1 alpha-2 country codes.
+  searchDomainFilter: ["science.org", "pnas.org", "-reddit.com"] // Optional: list of domains/URLs to limit search results to (max 20). You can also exclude specific domains from search results. (e.g.,  ["science.org", "pnas.org", "-reddit.com"])
+  searchRecencyFilter: 'week', // Optional: filter by recency (day, week, month, year)
+  searchAfterDate: "3/1/2025", // Optional: filter results after a specific date (format: MM/DD/YYYY)
+  searchBeforeDate: "3/5/2025" // Optional: filter results before a specific date (format: MM/DD/YYYY)
+  searchLanguageFilter: ["en", "fr", "de"], // Optional: filter by language using ISO 639-1 codes
+});
+
+const results = await webSearch({
+  query: 'latest developments in artificial intelligence',
+  maxResults: 10,
+  provider: [perplexityProvider]
 });
 ```
 
